@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aeterna Restaurants - Menu Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-12">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-amber-500/20">
+                    Æ
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white">Aeterna <span class="text-amber-500">Restaurants</span></h1>
+                    <p class="text-xs text-slate-400">Smart Menu Management System</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button id="viewToggleBtn" onclick="toggleView()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold transition-all border border-slate-700 flex items-center gap-2">
+                    <i class="fa-solid fa-eye text-amber-500"></i>
+                    <span id="toggleText">Customer View</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <!-- Admin Dashboard View -->
+        <div id="adminView" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Left Side: Add/Edit Menu Form -->
+            <div class="lg:col-span-5">
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 shadow-xl sticky top-28">
+                    <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-700">
+                        <h2 id="formTitle" class="text-lg font-bold text-amber-400 flex items-center gap-2">
+                            <i class="fa-solid fa-square-plus"></i> Naya Item Add Karen
+                        </h2>
+                        <button id="cancelEditBtn" onclick="resetForm()" class="hidden text-xs text-slate-400 hover:text-rose-400">
+                            <i class="fa-solid fa-xmark"></i> Cancel Edit
+                        </button>
+                    </div>
+
+                    <form id="menuForm" onsubmit="handleSaveItem(event)" class="space-y-5">
+                        <input type="hidden" id="itemId">
+
+                        <!-- Item Name -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Item Name *</label>
+                            <input type="text" id="itemName" required placeholder="e.g. Zinger Burger Supreme / Deal 1" 
+                                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 transition-colors">
+                        </div>
+
+                        <!-- Category & Base Price -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Category</label>
+                                <select id="itemCategory" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 transition-colors text-slate-200">
+                                    <option value="Burgers">Burgers</option>
+                                    <option value="Pizza">Pizza</option>
+                                    <option value="Deals & Combos">Deals & Combos</option>
+                                    <option value="Drinks & Desserts">Drinks & Desserts</option>
+                                    <option value="Sides">Sides</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Base Price (PKR) *</label>
+                                <input type="number" id="itemPrice" required min="0" placeholder="799" 
+                                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 transition-colors">
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Description</label>
+                            <textarea id="itemDescription" rows="2" placeholder="Briefly describe taste, preparation method, or extra perks..." 
+                                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 transition-colors"></textarea>
+                        </div>
+
+                        <!-- Mobile Direct Image Upload -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                                Item Image (Direct Upload from Phone/PC)
+                            </label>
+                            <div class="flex items-center gap-4 bg-slate-900 p-3 rounded-xl border border-slate-700 border-dashed">
+                                <div id="imagePreviewContainer" class="w-16 h-16 rounded-lg bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
+                                    <i class="fa-regular fa-image text-2xl text-slate-500"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <input type="file" id="itemImageFile" accept="image/*" onchange="previewSelectedImage(event)" class="hidden">
+                                    <label for="itemImageFile" class="inline-flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded-lg cursor-pointer transition-colors border border-slate-600">
+                                        <i class="fa-solid fa-upload text-amber-500"></i> Choose Photo
+                                    </label>
+                                    <p class="text-[11px] text-slate-500 mt-1">Select direct from camera or gallery.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Custom Sizes / Options / Combo Variants -->
+                        <div class="border-t border-slate-700/80 pt-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Sizes / Deals / Variations</label>
+                                <button type="button" onclick="addVariantRow()" class="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1">
+                                    <i class="fa-solid fa-circle-plus"></i> Add Size/Combo
+                                </button>
+                            </div>
+                            <div id="variantsContainer" class="space-y-2"></div>
+                        </div>
+
+                        <!-- Ingredients Transparency & Portions -->
+                        <div class="border-t border-slate-700/80 pt-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Ingredients & Quantity</label>
+                                <button type="button" onclick="addIngredientRow()" class="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1">
+                                    <i class="fa-solid fa-circle-plus"></i> Add Ingredient
+                                </button>
+                            </div>
+                            <div id="ingredientsContainer" class="space-y-2"></div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> <span id="submitBtnText">Save Item to Menu</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Side: Live Menu List -->
+            <div class="lg:col-span-7">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Current Menu</h2>
+                        <p class="text-xs text-slate-400">Manage items, customize availability, or edit details anytime.</p>
+                    </div>
+                    <div class="bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-xs text-slate-300">
+                        Total Items: <span id="totalItemsCount" class="font-bold text-amber-400">0</span>
+                    </div>
+                </div>
+
+                <div id="adminMenuList" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+            </div>
+        </div>
+
+        <!-- Customer View Preview -->
+        <div id="customerView" class="hidden">
+            <div class="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 mb-8 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-eye text-amber-500 text-xl"></i>
+                    <div>
+                        <h3 class="font-bold text-amber-400">Customer Preview Mode</h3>
+                        <p class="text-xs text-slate-400">Yeh preview dikhata ha ke aapke customers ko menu kesa nazar aaye ga.</p>
+                    </div>
+                </div>
+                <button onclick="toggleView()" class="px-3 py-1.5 bg-amber-500 text-slate-950 font-bold rounded-lg text-xs">
+                    Back to Admin Editor
+                </button>
+            </div>
+
+            <div id="customerMenuList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+    </div>
+
+    <script>
+        let menuData = JSON.parse(localStorage.getItem('aeterna_menu')) || [
+            {
+                id: '1',
+                name: 'Zinger Crunch Burger',
+                category: 'Burgers',
+                price: 590,
+                description: 'Crispy fried chicken breast fillet topped with spicy mayo and freshly cut lettuce.',
+                image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&auto=format&fit=crop',
+                available: true,
+                variants: [
+                    { name: 'Small / Regular', price: 590 },
+                    { name: 'Medium (With Fries)', price: 740 },
+                    { name: 'Large Combo (Fries + Drink)', price: 890 }
+                ],
+                ingredients: [
+                    { name: 'Chicken Fillet', qty: '150g' },
+                    { name: 'Cheese Slice', qty: '1 pc' },
+                    { name: 'Special Mayo', qty: '20ml' }
+                ]
+            }
+        ];
+
+        let currentImageDataUrl = '';
+
+        document.addEventListener('DOMContentLoaded', () => { renderMenuList(); });
+
+        function saveToStorage() { localStorage.setItem('aeterna_menu', JSON.stringify(menuData)); }
+
+        function previewSelectedImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImageDataUrl = e.target.result;
+                    document.getElementById('imagePreviewContainer').innerHTML = `<img src="${currentImageDataUrl}" class="w-full h-full object-cover">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function addVariantRow(name = '', price = '') {
+            const container = document.getElementById('variantsContainer');
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-2 variant-row';
+            row.innerHTML = `
+                <input type="text" placeholder="Size/Variant (e.g. Medium / Combo)" value="${name}" class="variant-name flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200">
+                <input type="number" placeholder="Price" value="${price}" class="variant-price w-24 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200">
+                <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-400 p-2"><i class="fa-solid fa-trash"></i></button>
+            `;
+            container.appendChild(row);
+        }
+
+        function addIngredientRow(name = '', qty = '') {
+            const container = document.getElementById('ingredientsContainer');
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-2 ingredient-row';
+            row.innerHTML = `
+                <input type="text" placeholder="Ingredient (e.g. Cheese)" value="${name}" class="ing-name flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200">
+                <input type="text" placeholder="Qty (e.g. 100g / 2 pcs)" value="${qty}" class="ing-qty w-28 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200">
+                <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-400 p-2"><i class="fa-solid fa-trash"></i></button>
+            `;
+            container.appendChild(row);
+        }
+
+        function handleSaveItem(e) {
+            e.preventDefault();
+            const id = document.getElementById('itemId').value || Date.now().toString();
+            const name = document.getElementById('itemName').value;
+            const category = document.getElementById('itemCategory').value;
+            const price = parseFloat(document.getElementById('itemPrice').value);
+            const description = document.getElementById('itemDescription').value;
+
+            const variantRows = document.querySelectorAll('.variant-row');
+            const variants = [];
+            variantRows.forEach(row => {
+                const vName = row.querySelector('.variant-name').value.trim();
+                const vPrice = parseFloat(row.querySelector('.variant-price').value);
+                if (vName && !isNaN(vPrice)) variants.push({ name: vName, price: vPrice });
+            });
+
+            const ingRows = document.querySelectorAll('.ingredient-row');
+            const ingredients = [];
+            ingRows.forEach(row => {
+                const iName = row.querySelector('.ing-name').value.trim();
+                const iQty = row.querySelector('.ing-qty').value.trim();
+                if (iName) ingredients.push({ name: iName, qty: iQty });
+            });
+
+            const existingIndex = menuData.findIndex(item => item.id === id);
+            const newItem = {
+                id, name, category, price, description,
+                image: currentImageDataUrl || (existingIndex >= 0 ? menuData[existingIndex].image : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop'),
+                available: existingIndex >= 0 ? menuData[existingIndex].available : true,
+                variants, ingredients
+            };
+
+            if (existingIndex >= 0) menuData[existingIndex] = newItem;
+            else menuData.unshift(newItem);
+
+            saveToStorage();
+            renderMenuList();
+            resetForm();
+        }
+
+        function editItem(id) {
+            const item = menuData.find(i => i.id === id);
+            if (!item) return;
+
+            document.getElementById('itemId').value = item.id;
+            document.getElementById('itemName').value = item.name;
+            document.getElementById('itemCategory').value = item.category;
+            document.getElementById('itemPrice').value = item.price;
+            document.getElementById('itemDescription').value = item.description || '';
+
+            currentImageDataUrl = item.image;
+            document.getElementById('imagePreviewContainer').innerHTML = `<img src="${item.image}" class="w-full h-full object-cover">`;
+
+            document.getElementById('variantsContainer').innerHTML = '';
+            document.getElementById('ingredientsContainer').innerHTML = '';
+
+            item.variants.forEach(v => addVariantRow(v.name, v.price));
+            item.ingredients.forEach(ing => addIngredientRow(ing.name, ing.qty));
+
+            document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Item Edit Karen';
+            document.getElementById('submitBtnText').innerText = 'Update Item Details';
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+        }
+
+        function resetForm() {
+            document.getElementById('menuForm').reset();
+            document.getElementById('itemId').value = '';
+            currentImageDataUrl = '';
+            document.getElementById('imagePreviewContainer').innerHTML = '<i class="fa-regular fa-image text-2xl text-slate-500"></i>';
+            document.getElementById('variantsContainer').innerHTML = '';
+            document.getElementById('ingredientsContainer').innerHTML = '';
+            document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-square-plus"></i> Naya Item Add Karen';
+            document.getElementById('submitBtnText').innerText = 'Save Item to Menu';
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        }
+
+        function deleteItem(id) {
+            if (confirm('Kya aap sure hain ke is item ko remove karna chahte hain?')) {
+                menuData = menuData.filter(i => i.id !== id);
+                saveToStorage();
+                renderMenuList();
+            }
+        }
+
+        function toggleAvailability(id) {
+            const item = menuData.find(i => i.id === id);
+            if (item) {
+                item.available = !item.available;
+                saveToStorage();
+                renderMenuList();
+            }
+        }
+
+        function renderMenuList() {
+            document.getElementById('totalItemsCount').innerText = menuData.length;
+            const adminList = document.getElementById('adminMenuList');
+            const customerList = document.getElementById('customerMenuList');
+
+            adminList.innerHTML = '';
+            customerList.innerHTML = '';
+
+            menuData.forEach(item => {
+                const adminCard = document.createElement('div');
+                adminCard.className = `bg-slate-800/90 border rounded-2xl overflow-hidden shadow-lg transition-all ${item.available ? 'border-slate-700' : 'border-rose-900/40 opacity-70'}`;
+                adminCard.innerH
